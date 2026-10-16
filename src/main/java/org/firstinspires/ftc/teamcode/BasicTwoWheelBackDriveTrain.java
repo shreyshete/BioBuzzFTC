@@ -86,7 +86,9 @@ public class BasicTwoWheelBackDriveTrain {
         int counts = (int) (inches * COUNTS_PER_INCH);
 
         int leftTarget  = backLeft.getCurrentPosition()  + counts;
-        int rightTarget = backRight.getCurrentPosition() + counts;
+        // backRight is physically REVERSE, so its target must be negated
+        // relative to its current position to move in the same direction
+        int rightTarget = backRight.getCurrentPosition() - counts;
 
         backLeft.setTargetPosition(leftTarget);
         backRight.setTargetPosition(rightTarget);

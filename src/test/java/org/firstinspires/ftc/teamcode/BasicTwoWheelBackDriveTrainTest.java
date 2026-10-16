@@ -195,4 +195,49 @@ class BasicTwoWheelBackDriveTrainTest {
         assertTrue(telemetry.hasEntry("Motors"),
             "Expected 'Motors' telemetry entry after drive()");
     }
+
+    // ----------------------------------------------- encoder: driveByEncoder
+
+    @Test
+    @DisplayName("driveByEncoder forward: leftTarget > 0, rightTarget < 0 (opposite signs)")
+    void driveByEncoderForwardTargetsOppositeSigns() {
+        // backRight is REVERSE — its target must be negated to move same
+        // physical direction as backLeft
+        drivetrain.driveByEncoder(0.6, 24);
+        assertTrue(backLeft.targetPosition  > 0, "leftTarget should be positive for forward drive");
+        assertTrue(backRight.targetPosition < 0, "rightTarget should be negative for forward drive");
+    }
+
+    @Test
+    @DisplayName("driveByEncoder forward: both targets equal magnitude")
+    void driveByEncoderForwardEqualMagnitude() {
+        drivetrain.driveByEncoder(0.6, 24);
+        assertEquals(backLeft.targetPosition, -backRight.targetPosition,
+            "Left and right encoder targets should be equal magnitude for straight drive");
+    }
+
+    @Test
+    @DisplayName("driveByEncoder backward: leftTarget < 0, rightTarget > 0")
+    void driveByEncoderBackwardTargetsOppositeSigns() {
+        drivetrain.driveByEncoder(0.6, -24);
+        assertTrue(backLeft.targetPosition  < 0, "leftTarget should be negative for reverse drive");
+        assertTrue(backRight.targetPosition > 0, "rightTarget should be positive for reverse drive");
+    }
+
+    @Test
+    @DisplayName("driveByEncoder: both motors set to RUN_TO_POSITION mode")
+    void driveByEncoderSetsRunToPositionMode() {
+        drivetrain.driveByEncoder(0.6, 24);
+        // After completion, stopAndResetToEncoder restores RUN_USING_ENCODER
+        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER, backLeft.lastMode);
+        assertEquals(DcMotor.RunMode.RUN_USING_ENCODER, backRight.lastMode);
+    }
+
+    @Test
+    @DisplayName("driveByEncoder: motors stopped (power = 0) after completion")
+    void driveByEncoderStopsMotorsAfterCompletion() {
+        drivetrain.driveByEncoder(0.6, 24);
+        assertEquals(0.0, backLeft.lastPower,  1e-6, "backLeft should be stopped after driveByEncoder");
+        assertEquals(0.0, backRight.lastPower, 1e-6, "backRight should be stopped after driveByEncoder");
+    }
 }
